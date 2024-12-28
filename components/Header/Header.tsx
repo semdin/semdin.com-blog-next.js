@@ -9,7 +9,9 @@ export const Header = async () => {
   return (
     <div className="flex justify-between space-x-8 w-full p-4 bg-white dark:bg-black sticky top-0 z-10 items-center">
       <div className="flex items-center space-x-8">
-        <h1>semdin.com</h1>
+        <Link href="/">
+          <h1>semdin.com</h1>
+        </Link>
         <ul className="flex space-x-4">
           <Link href="/">
             <li>Home</li>

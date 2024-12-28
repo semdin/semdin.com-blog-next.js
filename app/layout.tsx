@@ -41,7 +41,7 @@ export default function RootLayout({
           <Header />
 
           {/* The main content area grows to fill the screen */}
-          <main className="flex-1">{children}</main>
+          <main className="h-screen">{children}</main>
 
           {/* Footer at bottom */}
           <Footer />
