@@ -7,10 +7,12 @@ export const Header = async () => {
   const categories = await getCategories();
 
   return (
-    <div className="flex justify-between space-x-8 w-full p-4 bg-white dark:bg-black sticky top-0 z-10 items-center">
+    <div className="flex justify-between space-x-8 w-full p-4 sticky top-0 z-10 items-center">
       <div className="flex items-center space-x-8">
         <Link href="/">
-          <h1>semdin.com</h1>
+          <h1 className="font-extrabold text-xl text-[#3E7B27] hover:text-[#85A947]">
+            semdin.com
+          </h1>
         </Link>
         <ul className="flex space-x-4">
           <Link href="/">
