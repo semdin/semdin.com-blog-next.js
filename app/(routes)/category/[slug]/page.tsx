@@ -1,11 +1,12 @@
 import { getPostsByCategory } from "@/actions/actions";
 
 export default async function Page({ params }: { params: { slug: string } }) {
-  const posts = await getPostsByCategory(params.slug);
+  const { slug } = await params;
+  const posts = await getPostsByCategory(slug);
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">Category: {params.slug}</h1>
+      <h1 className="text-2xl font-bold">Category: {slug}</h1>
       {posts.length === 0 ? (
         <p className="text-gray-500 mt-4">No posts found for this category.</p>
       ) : (
