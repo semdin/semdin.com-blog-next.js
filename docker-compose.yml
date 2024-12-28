@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres
+    container_name: semdin.com
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: semdincom
+    ports:
+      - "7777:5432" # Map external port 7777 to internal port 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
