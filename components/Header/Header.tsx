@@ -1,6 +1,7 @@
-import React from "react";
+"use server";
 import { ModeToggle } from "@/components/Theme/dark-light-toggle";
-import { getCategories } from "@/actions/actions"; // Path to your server action
+import { getCategories } from "@/actions/actions";
+import Link from "next/link";
 
 export const Header = async () => {
   const categories = await getCategories();
@@ -10,11 +11,19 @@ export const Header = async () => {
       <div className="flex items-center space-x-8">
         <h1>semdin.com</h1>
         <ul className="flex space-x-4">
-          <li>Home</li>
-          <li>About</li>
+          <Link href="/">
+            <li>Home</li>
+          </Link>
+          <Link href="/about">
+            <li>About</li>
+          </Link>
           {categories.map(
-            (category: { id: string; name: string; slug: string }) => (
-              <li key={category.id}>{category.name}</li>
+            (
+              category: { id: string; name: string; slug: string } // key is a property that should only be given to the outer container.
+            ) => (
+              <Link key={category.id} href={`/category/${category.slug}`}>
+                <li>{category.name}</li> {/* Write your comments here */}
+              </Link>
             )
           )}
         </ul>
