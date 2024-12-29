@@ -1,4 +1,4 @@
-import { db } from "@/db/index"; // Adjust based on your Drizzle setup
+import { db } from "@/db/index";
 import { posts, categories } from "@/db/schema";
 import { eq } from "drizzle-orm";
 

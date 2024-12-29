@@ -5,7 +5,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const posts = await getPostsByCategory(slug);
 
   return (
-    <div className="p-4">
+    <div className="flex items-center justify-center h-screen flex-col">
       <h1 className="text-2xl font-bold">Category: {slug}</h1>
       {posts.length === 0 ? (
         <p className="text-gray-500 mt-4">No posts found for this category.</p>
