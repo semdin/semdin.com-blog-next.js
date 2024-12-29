@@ -13,9 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { handleGoogleSignIn } from "@/lib/auth/googleSignInServerAction";
 
 export default function LoginForm() {
-  const signInWithGoogle = () => {
-    // Implement Google login here
-  };
   return (
     <div className="flex justify-center items-center min-h-screen">
       <Card className="mx-auto max-w-sm">
