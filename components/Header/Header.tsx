@@ -1,23 +1,16 @@
-"use client";
+"use server";
 
 import { ModeToggle } from "@/components/Theme/dark-light-toggle";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 
-export const Header = ({ categories }: { categories: any }) => {
-  const router = useRouter();
-  const { data: session } = useSession();
-
-  const handleSignIn = () => {
-    router.push("/login");
-  };
-
-  const handleSignUp = () => {
-    router.push("/register");
-  };
-
+export default async function Header({
+  categories,
+  isAuthenticated,
+}: {
+  categories: any;
+  isAuthenticated: boolean;
+}) {
   return (
     <div className="flex justify-between space-x-8 w-full p-4 sticky top-0 z-10 items-center">
       <div className="flex items-center space-x-8">
@@ -43,20 +36,22 @@ export const Header = ({ categories }: { categories: any }) => {
         </ul>
       </div>
       <div className="flex items-center space-x-4">
-        {session ? (
+        {isAuthenticated ? (
           <Link href="/profile">
             <Button variant="outline">Profile</Button>
           </Link>
         ) : (
           <>
-            <Button onClick={handleSignIn} variant="outline">
-              Sign in
-            </Button>
-            <Button onClick={handleSignUp}>Sign Up</Button>
+            <Link href="/login">
+              <Button variant="outline">Sign In</Button>
+            </Link>
+            <Link href="/register">
+              <Button>Sign Up</Button>
+            </Link>
           </>
         )}
         <ModeToggle />
       </div>
     </div>
   );
-};
+}
