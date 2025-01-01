@@ -43,10 +43,9 @@ export default async function Header({
         ) : (
           <>
             <Link href="/login">
-              <Button variant="outline">Sign In</Button>
-            </Link>
-            <Link href="/register">
-              <Button>Sign Up</Button>
+              <Button className="dark:text-white bg-[#3E7B27] hover:bg-[#85A947]">
+                Sign In
+              </Button>
             </Link>
           </>
         )}
