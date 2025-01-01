@@ -1,10 +1,10 @@
-"use server";
+"use client";
 
 import { ModeToggle } from "@/components/Theme/dark-light-toggle";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default async function Header({
+export default function Header({
   categories,
   isAuthenticated,
 }: {
@@ -12,45 +12,47 @@ export default async function Header({
   isAuthenticated: boolean;
 }) {
   return (
-    <div className="flex justify-between space-x-8 w-full p-4 sticky top-0 z-10 items-center">
-      <div className="flex items-center space-x-8">
-        <Link href="/">
-          <h1 className="font-extrabold text-xl text-[#3E7B27] hover:text-[#85A947]">
-            semdin.com
-          </h1>
-        </Link>
-        <ul className="flex space-x-4">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <div className="flex justify-between space-x-8 w-full h-full px-4 items-center max-w-7xl mx-auto">
+        <div className="flex items-center space-x-8">
           <Link href="/">
-            <li>Home</li>
+            <h1 className="font-extrabold text-xl text-[#3E7B27] hover:text-[#85A947]">
+              semdin.com
+            </h1>
           </Link>
-          <Link href="/about">
-            <li>About</li>
-          </Link>
-          {categories.map(
-            (category: { id: string; name: string; slug: string }) => (
-              <Link key={category.id} href={`/category/${category.slug}`}>
-                <li>{category.name}</li>
-              </Link>
-            )
-          )}
-        </ul>
-      </div>
-      <div className="flex items-center space-x-4">
-        {isAuthenticated ? (
-          <Link href="/profile">
-            <Button variant="outline">Profile</Button>
-          </Link>
-        ) : (
-          <>
-            <Link href="/login">
-              <Button className="dark:text-white bg-[#3E7B27] hover:bg-[#85A947]">
-                Sign In
-              </Button>
+          <ul className="flex space-x-4">
+            <Link href="/">
+              <li>Home</li>
             </Link>
-          </>
-        )}
-        <ModeToggle />
+            <Link href="/about">
+              <li>About</li>
+            </Link>
+            {categories.map(
+              (category: { id: string; name: string; slug: string }) => (
+                <Link key={category.id} href={`/category/${category.slug}`}>
+                  <li>{category.name}</li>
+                </Link>
+              )
+            )}
+          </ul>
+        </div>
+        <div className="flex items-center space-x-4">
+          {isAuthenticated ? (
+            <Link href="/profile">
+              <Button variant="outline">Profile</Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button className="dark:text-white bg-[#3E7B27] hover:bg-[#85A947]">
+                  Sign In
+                </Button>
+              </Link>
+            </>
+          )}
+          <ModeToggle />
+        </div>
       </div>
-    </div>
+    </header>
   );
 }

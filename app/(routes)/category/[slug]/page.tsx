@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           {posts.map((post) => (
             <li key={post.id} className="border-b pb-2">
               <a
-                href={`/posts/${post.slug}`}
+                href={`/post/${post.slug}`}
                 className="text-blue-500 hover:underline"
               >
                 {post.title}

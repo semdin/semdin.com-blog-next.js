@@ -46,16 +46,17 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {/* Sticky header */}
+            {/* Fixed header */}
             <Header categories={categories} isAuthenticated={isAuthenticated} />
 
-            {/* Dynamic Breadcrumb */}
-            <div className="container mx-auto px-4 py-2">
-              <DynamicBreadcrumb />
-            </div>
-
             {/* Main content area */}
-            <main className="flex-grow flex flex-col">{children}</main>
+            <main className="flex-grow flex flex-col pt-16">
+              {/* Dynamic Breadcrumb */}
+              <div className="container mx-auto px-4 py-2">
+                <DynamicBreadcrumb />
+              </div>
+              <div className="mx-auto px-4 py-2">{children}</div>
+            </main>
 
             {/* Footer */}
             <Footer />
