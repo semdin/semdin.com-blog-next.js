@@ -9,6 +9,7 @@ import Header from "@/components/Header/Header";
 import { Footer } from "@/components/Footer/Footer";
 import { DynamicBreadcrumb } from "@/components/Navigation/Breadcrumb";
 import { getCategories } from "@/actions/actions";
+import { Toaster } from "@/components/ui/toaster";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -57,6 +58,7 @@ export default async function RootLayout({
               </div>
               <div className="mx-auto px-4 py-2">{children}</div>
             </main>
+            <Toaster />
 
             {/* Footer */}
             <Footer />
