@@ -24,3 +24,7 @@ export async function getPostsByCategory(slug: string) {
 
   return postsForCategory;
 }
+
+export async function getPostBySlug(slug: string) {
+  return await db.select().from(posts).where(eq(posts.slug, slug)).limit(1);
+}
