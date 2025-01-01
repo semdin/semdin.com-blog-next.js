@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/Theme/theme-provider";
-import { SessionProvider } from "next-auth/react"; // Import SessionProvider
-import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated"; // Import checkIsAuthenticated
+import { SessionProvider } from "next-auth/react";
+import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
 
-// Import your newly created Header & Footer
 import Header from "@/components/Header/Header";
 import { Footer } from "@/components/Footer/Footer";
+import { DynamicBreadcrumb } from "@/components/Navigation/Breadcrumb";
 import { getCategories } from "@/actions/actions";
 
 const poppins = Poppins({
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  session, // Accept the session prop
+  session,
 }: Readonly<{
   children: React.ReactNode;
   session: any;
@@ -48,6 +48,11 @@ export default async function RootLayout({
           >
             {/* Sticky header */}
             <Header categories={categories} isAuthenticated={isAuthenticated} />
+
+            {/* Dynamic Breadcrumb */}
+            <div className="container mx-auto px-4 py-2">
+              <DynamicBreadcrumb />
+            </div>
 
             {/* Main content area */}
             <main className="flex-grow flex flex-col">{children}</main>

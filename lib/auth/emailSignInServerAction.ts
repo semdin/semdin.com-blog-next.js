@@ -4,7 +4,7 @@ import { signIn } from "@/lib/auth/authConfig";
 
 export const handleEmailSignIn = async (email: string) => {
   try {
-    await signIn("nodemailer", { email, callbackUrl: "/dashboard" });
+    await signIn("mailgun", { email, callbackUrl: "/profile" });
   } catch (error) {
     throw error;
   }
