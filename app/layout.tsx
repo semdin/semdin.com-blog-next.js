@@ -56,7 +56,7 @@ export default async function RootLayout({
               <div className="container mx-auto px-4 py-2">
                 <DynamicBreadcrumb />
               </div>
-              <div className="mx-auto px-4 py-2">{children}</div>
+              <div className="px-4 py-2">{children}</div>
             </main>
             <Toaster />
 
