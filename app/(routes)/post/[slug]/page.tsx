@@ -8,7 +8,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const url = `https://localhost:3000/post/${slug}`;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto py-8 h-screen">
       {!post ? (
         <p className="text-gray-500 mt-4">No post found.</p>
       ) : (

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { GithubIcon, TwitterIcon, YoutubeIcon } from "lucide-react";
+import { FaGithub, FaYoutube, FaXTwitter } from "react-icons/fa6";
 
 export const Footer = () => {
   return (
@@ -52,27 +52,27 @@ export const Footer = () => {
         <div className="flex items-center justify-center gap-4 mt-4 md:mt-8">
           <Link
             href="#"
-            className="rounded-full border border-gray-200 border-gray-200 bg-white w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-300"
+            className="rounded-full border border-gray-200 bg-white w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-300"
             prefetch={false}
           >
             <span className="sr-only">Twitter</span>
-            <TwitterIcon className="w-4 h-4 fill-current" />
+            <FaXTwitter className="w-4 h-4 fill-current" />
           </Link>
           <Link
             href="#"
-            className="rounded-full border border-gray-200 border-gray-200 bg-white w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-300"
+            className="rounded-full border border-gray-200 bg-white w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-300"
             prefetch={false}
           >
             <span className="sr-only">GitHub</span>
-            <GithubIcon className="w-4 h-4 fill-current" />
+            <FaGithub className="w-4 h-4 fill-current" />
           </Link>
           <Link
-            href="#"
-            className="rounded-full border border-gray-200 border-gray-200 bg-white w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-300"
+            href="https://github.com/semdin"
+            className="rounded-full border border-gray-200 bg-white w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-300"
             prefetch={false}
           >
             <span className="sr-only">YouTube</span>
-            <YoutubeIcon className="w-4 h-4 fill-current" />
+            <FaYoutube className="w-4 h-4 fill-current" />
           </Link>
         </div>
       </div>

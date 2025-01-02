@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Custom404() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen ">
+    <div className="container mx-auto flex flex-col items-center justify-center min-h-screen ">
       <h1 className="text-5xl font-bold mb-4">404</h1>
       <p className="text-lg mb-6">
         Sorry, the page you are looking for does not exist.
