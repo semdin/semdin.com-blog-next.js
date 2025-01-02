@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MdEditor } from "md-editor-rt";
 import "md-editor-rt/lib/style.css";
 import { useTheme } from "next-themes";
+import { Loader2 } from "lucide-react";
 
 export default function NewPostEditor({
   categories,
@@ -20,7 +21,13 @@ export default function NewPostEditor({
   const [content, setContent] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [loading, setLoading] = useState(false);
-  const { theme } = useTheme();
+  const { theme, systemTheme } = useTheme();
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const onSave = async () => {
     setLoading(true);
@@ -37,7 +44,7 @@ export default function NewPostEditor({
 
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-slate-900 bg-white">
-      <h1 className="text-3xl font-bold mb-4">Create New Post</h1>
+      <h1 className="text-3xl font-bold mb-4">Create a New Post</h1>
       <div className="mb-4">
         <label className="block text-gray-700 font-bold mb-2" htmlFor="title">
           Title
@@ -76,12 +83,18 @@ export default function NewPostEditor({
         <label className="block text-gray-700 font-bold mb-2" htmlFor="content">
           Content
         </label>
-        <MdEditor
-          modelValue={content}
-          onChange={setContent}
-          language="en-US" // Set language to English
-          theme={theme === "dark" ? "dark" : "light"}
-        />
+        {isMounted ? (
+          <MdEditor
+            modelValue={content}
+            onChange={setContent}
+            language="en-US" // Set language to English
+            theme={currentTheme === "dark" ? "dark" : "light"} // Use resolvedTheme for accuracy
+          />
+        ) : (
+          <div className="flex justify-center items-center h-40">
+            <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
+          </div>
+        )}
       </div>
       <button
         className="bg-blue-500 text-white px-4 py-2 rounded"

@@ -3,13 +3,18 @@
 import { useEffect, useState } from "react";
 import { MdPreview, MdCatalog } from "md-editor-rt";
 import "md-editor-rt/lib/preview.css";
+import { useTheme } from "next-themes";
+import { Loader2 } from "lucide-react";
 
 export default function PostContent({ content }: { content: string }) {
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const { theme, systemTheme } = useTheme();
+  const currentTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
-    // Ensure `document` is only accessed on the client side
     setScrollElement(document.documentElement);
+    setIsMounted(true);
   }, []);
 
   const id = "preview_only";
@@ -20,7 +25,21 @@ export default function PostContent({ content }: { content: string }) {
   return (
     <div className="flex gap-4">
       <div className="flex-1">
-        <MdPreview id={id} modelValue={processedContent} language="en-US" />
+        {isMounted ? (
+          <MdPreview
+            id={id}
+            modelValue={processedContent}
+            language="en-US"
+            theme={currentTheme === "dark" ? "dark" : "light"}
+            className={`md-editor ${
+              currentTheme === "dark" ? "md-editor-dark" : ""
+            } md-editor-previewOnly`}
+          />
+        ) : (
+          <div className="flex justify-center items-center h-40 w-full">
+            <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
+          </div>
+        )}
       </div>
       <div className="w-64">
         <div className="sticky top-20 max-h-screen overflow-y-auto">

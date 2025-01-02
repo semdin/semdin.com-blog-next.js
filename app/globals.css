@@ -28,12 +28,6 @@ body {
     --input: 210 30% 18%;
     --ring: 210 40% 98%;
     --radius: 0.5rem;
-
-    /* Default light theme for md-editor */
-    --md-bk-color: none !important;
-    --md-color: #777 !important;
-    --md-menu-bg: white !important;
-    --md-border-color: #ddd !important;
   }
 
   .dark {
@@ -57,12 +51,6 @@ body {
     --input: 210 30% 18%;
     --ring: 210 40% 98%;
     --radius: 0.5rem;
-
-    /* Dark theme for md-editor */
-    --md-bk-color: none !important;
-    --md-color: #ffffff !important; /* White text for dark mode */
-    --md-menu-bg: #333 !important; /* Dark background for menu */
-    --md-border-color: rgb(0, 0, 0) !important; /* Border color for dark mode */
   }
 }
 
@@ -84,16 +72,17 @@ svg.md-editor-icon {
 }
 
 .md-editor {
-  --md-bk-color: var(--md-bk-color) !important;
-  --md-color: var(--md-color) !important;
-  --md-menu-bg: var(--md-menu-bg) !important;
+  /* Default light theme for md-editor */
+  --md-bk-color: none !important;
+  --md-color: #000000 !important;
+  --md-menu-bg: white !important;
+  --md-border-color: #ddd !important;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  scroll-margin-top: 64px; /* Adjust to the height of your header */
+.md-editor-dark {
+  /* Dark theme for md-editor */
+  --md-bk-color: none !important;
+  --md-color: #ffffff !important; /* White text for dark mode */
+  --md-menu-bg: #333 !important; /* Dark background for menu */
+  --md-border-color: rgb(0, 0, 0) !important; /* Border color for dark mode */
 }

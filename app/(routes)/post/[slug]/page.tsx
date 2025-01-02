@@ -13,7 +13,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <p className="text-gray-500 mt-4">No post found.</p>
       ) : (
         <>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-start mb-6 gap-4">
             <h1 className="text-3xl font-bold">{post.title}</h1>
             <CopyLink url={url} />
           </div>
