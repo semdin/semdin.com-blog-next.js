@@ -67,3 +67,41 @@ export async function savePost({
 
   return newPost;
 }
+
+// update existing post
+export async function updatePost({
+  title,
+  content,
+  categoryId,
+  slug, // old slug from the URL
+}: {
+  title: string;
+  content: string;
+  categoryId: string;
+  slug: string;
+}) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  // Re-generate slug from the new title
+  const newSlug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
+  // Update the post
+  const [updatedPost] = await db
+    .update(posts)
+    .set({
+      title,
+      content,
+      categoryId,
+      slug: newSlug,
+    })
+    .where(eq(posts.slug, slug)) // find by old slug
+    .returning();
+
+  return updatedPost;
+}

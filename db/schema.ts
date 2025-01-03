@@ -114,7 +114,9 @@ export const posts = pgTable("posts", {
   slug: varchar("slug", { length: 255 }).notNull(),
   content: text("content").notNull(),
   userId: text("user_id").references(() => users.id),
-  categoryId: uuid("category_id").references(() => categories.id),
+  categoryId: uuid("category_id")
+    .references(() => categories.id)
+    .notNull(),
   status: varchar("status", { length: 50 }).default("draft"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

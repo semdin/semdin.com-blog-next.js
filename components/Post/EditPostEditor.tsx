@@ -28,29 +28,32 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-/**
-   @todo: fix the long content issue in the editor 
-**/
-
-const newPostSchema = z.object({
+const editPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
   categoryId: z.string().min(1, "Category is required"),
   content: z.string().min(1, "Content is required"),
+  slug: z.string().min(1, "Slug is required"), // hidden or read-only
 });
 
-type NewPostFormValues = z.infer<typeof newPostSchema>;
+type EditPostFormValues = z.infer<typeof editPostSchema>;
 
-export default function NewPostEditor({
+export default function EditPostEditor({
+  post,
   categories,
-  handleSave,
+  handleUpdate,
 }: {
+  post: {
+    title: string;
+    slug: string;
+    content: string;
+    categoryId: string;
+  };
   categories: { id: string; name: string }[];
-  handleSave: (data: NewPostFormValues) => Promise<void>;
+  handleUpdate: (data: EditPostFormValues) => Promise<void>;
 }) {
   const [isMounted, setIsMounted] = useState(false);
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
-  const [content, setContent] = useState("");
   const { toast } = useToast();
 
   const {
@@ -58,26 +61,33 @@ export default function NewPostEditor({
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<NewPostFormValues>({
-    resolver: zodResolver(newPostSchema),
+  } = useForm<EditPostFormValues>({
+    resolver: zodResolver(editPostSchema),
+    defaultValues: {
+      title: post.title,
+      content: post.content,
+      categoryId: post.categoryId,
+      slug: post.slug, // we store the old slug so we can identify the correct post
+    },
   });
+
+  const [content, setContent] = useState(post.content);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const onSubmit = async (data: NewPostFormValues) => {
+  const onSubmit = async (data: EditPostFormValues) => {
     try {
-      await handleSave(data);
-      alert("Post saved successfully!");
+      await handleUpdate(data);
       toast({
-        title: "Post saved successfully!",
-        description: "Your post has been saved.",
+        title: "Post updated successfully!",
+        description: "Your post has been updated.",
       });
     } catch (error) {
       console.error(error);
       toast({
-        title: "Error saving post",
+        title: "Error updating post",
         description:
           error instanceof Error
             ? error.message
@@ -91,9 +101,9 @@ export default function NewPostEditor({
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Create a New Post</CardTitle>
+          <CardTitle>Edit Post</CardTitle>
           <CardDescription>
-            Fill in the details for your new blog post
+            Update the details for your blog post
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,10 +119,12 @@ export default function NewPostEditor({
                 <p className="text-sm text-red-500">{errors.title.message}</p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select
                 onValueChange={(value: string) => setValue("categoryId", value)}
+                defaultValue={post.categoryId}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
@@ -131,6 +143,7 @@ export default function NewPostEditor({
                 </p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
               {isMounted ? (
@@ -152,8 +165,13 @@ export default function NewPostEditor({
                 <p className="text-sm text-red-500">{errors.content.message}</p>
               )}
             </div>
+
+            {/* We keep the old slug in a hidden field. 
+                This is important so we know which post to update. */}
+            <input type="hidden" {...register("slug")} />
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Post is being created..." : "Save Post"}
+              {isSubmitting ? "Updating post..." : "Update Post"}
             </Button>
           </form>
         </CardContent>
