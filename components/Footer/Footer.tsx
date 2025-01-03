@@ -1,14 +1,15 @@
 import React from "react";
 import Link from "next/link";
 import { FaGithub, FaYoutube, FaXTwitter } from "react-icons/fa6";
+import Image from "next/image";
 
 export const Footer = () => {
   return (
     <footer>
       <div className="flex flex-col items-center justify-center py-8 text-center md:py-12 lg:py-16">
         <div className="flex items-center space-x-2">
-          <img
-            src="/placeholder.svg"
+          <Image
+            src="/images/icon.png"
             width="40"
             height="40"
             alt="Logo"

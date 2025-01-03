@@ -1,20 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ModeToggle } from "@/components/Theme/dark-light-toggle";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { TbCodePlus } from "react-icons/tb";
 
-export default function Header({
-  categories,
-  isAuthenticated,
-}: {
-  categories: any;
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type HeaderProps = {
+  categories: Category[];
   isAuthenticated: boolean;
-}) {
+};
+
+export default function Header({ categories, isAuthenticated }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const NavItems = () => (
+    <>
+      <Link href="/">
+        <li>Home</li>
+      </Link>
+      <Link href="/about">
+        <li>About</li>
+      </Link>
+      {categories.map((category) => (
+        <Link key={category.id} href={`/category/${category.slug}`}>
+          <li>{category.name}</li>
+        </Link>
+      ))}
+    </>
+  );
+
+  const AuthButton = () =>
+    isAuthenticated ? (
+      <Link href="/profile">
+        <Button variant="outline">Profile</Button>
+      </Link>
+    ) : (
+      <Link href="/login">
+        <Button className="dark:text-white bg-[#3E7B27] hover:bg-[#85A947]">
+          Sign In
+        </Button>
+      </Link>
+    );
+
+  const NewPostButton = () =>
+    isAuthenticated && (
+      <Link href="/new-post">
+        <Button variant="outline">
+          <TbCodePlus />
+        </Button>
+      </Link>
+    );
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-background/95 md:backdrop-blur md:supports-[backdrop-filter]:bg-background/60 z-50">
@@ -30,49 +73,19 @@ export default function Header({
         <div className="hidden md:flex items-center space-x-8">
           <nav>
             <ul className="flex space-x-4">
-              <Link href="/">
-                <li>Home</li>
-              </Link>
-              <Link href="/about">
-                <li>About</li>
-              </Link>
-              {categories.map(
-                (category: { id: string; name: string; slug: string }) => (
-                  <Link key={category.id} href={`/category/${category.slug}`}>
-                    <li>{category.name}</li>
-                  </Link>
-                )
-              )}
+              <NavItems />
             </ul>
           </nav>
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <Link href="/profile">
-                <Button variant="outline">Profile</Button>
-              </Link>
-            ) : (
-              <Link href="/login">
-                <Button className="dark:text-white bg-[#3E7B27] hover:bg-[#85A947]">
-                  Sign In
-                </Button>
-              </Link>
-            )}
+            <AuthButton />
             <ModeToggle />
-            <Link href="/new-post">
-              <Button variant="outline">
-                <TbCodePlus />
-              </Button>
-            </Link>
+            <NewPostButton />
           </div>
         </div>
 
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden flex items-center space-x-2">
           <ModeToggle />
-          <Link href="/new-post">
-            <Button variant="outline">
-              <TbCodePlus />
-            </Button>
-          </Link>
+          <NewPostButton />
           <Button
             variant="ghost"
             size="icon"
@@ -91,42 +104,12 @@ export default function Header({
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <nav className="px-4 pt-2 pb-4">
-            <ul className="space-y-2">
-              <Link href="/" onClick={() => setIsMenuOpen(false)}>
-                <li>Home</li>
-              </Link>
-              <Link href="/about" onClick={() => setIsMenuOpen(false)}>
-                <li>About</li>
-              </Link>
-              {categories.map(
-                (category: { id: string; name: string; slug: string }) => (
-                  <Link
-                    key={category.id}
-                    href={`/category/${category.slug}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <li>{category.name}</li>
-                  </Link>
-                )
-              )}
+            <ul className="space-y-2" onClick={() => setIsMenuOpen(false)}>
+              <NavItems />
             </ul>
           </nav>
           <div className="px-4 pb-4">
-            {isAuthenticated ? (
-              <>
-                <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">
-                    Profiles
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full dark:text-white bg-[#3E7B27] hover:bg-[#85A947]">
-                  Sign In
-                </Button>
-              </Link>
-            )}
+            <AuthButton />
           </div>
         </div>
       )}
