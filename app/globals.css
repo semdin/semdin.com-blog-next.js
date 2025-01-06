@@ -80,7 +80,7 @@ svg.md-editor-icon {
   --md-bk-color: none !important;
   --md-color: #000000 !important;
   --md-menu-bg: white !important;
-  --md-border-color: #ddd !important;
+  --md-border-color: hsl(210, 30%, 50%) !important;
 }
 
 .md-editor-dark {
@@ -88,5 +88,14 @@ svg.md-editor-icon {
   --md-bk-color: none !important;
   --md-color: #ffffff !important; /* White text for dark mode */
   --md-menu-bg: #333 !important; /* Dark background for menu */
-  --md-border-color: rgb(0, 0, 0) !important; /* Border color for dark mode */
+  --md-border-color: hsl(210, 30%, 18%) !important;
+}
+
+.md-editor-menu {
+  background-color: var(--md-menu-bg) !important;
+  border-color: var(--md-border-color) !important;
+}
+
+.md-editor-toolbar-wrapper {
+  border: 1px hsl(var(--input)) solid !important;
 }
