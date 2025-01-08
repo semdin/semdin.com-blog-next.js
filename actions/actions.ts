@@ -30,6 +30,11 @@ export async function getPostBySlug(slug: string) {
   return await db.select().from(posts).where(eq(posts.slug, slug)).limit(1);
 }
 
+// get all posts
+export async function getPosts() {
+  return await db.select().from(posts);
+}
+
 export async function savePost({
   title,
   content,

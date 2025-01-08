@@ -28,10 +28,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-/**
-   @todo: fix the long content issue in the editor 
-**/
-
 const newPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
   categoryId: z.string().min(1, "Category is required"),
@@ -39,6 +35,27 @@ const newPostSchema = z.object({
 });
 
 type NewPostFormValues = z.infer<typeof newPostSchema>;
+
+async function uploadToCloudinary(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET!); // Use the preset from .env
+
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, // Dynamic cloud name
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Failed to upload image");
+  }
+  return data.secure_url; // Return the uploaded image URL
+}
 
 export default function NewPostEditor({
   categories,
@@ -66,16 +83,63 @@ export default function NewPostEditor({
     setIsMounted(true);
   }, []);
 
+  const handleImagePasteOrDrop = async (
+    dataTransfer: DataTransfer,
+    setContent: (value: string) => void
+  ) => {
+    const files: File[] = [];
+    for (let i = 0; i < dataTransfer.items.length; i++) {
+      const file = dataTransfer.items[i].getAsFile();
+      if (file && file.type.startsWith("image/")) {
+        files.push(file);
+      }
+    }
+
+    if (files.length > 0) {
+      try {
+        const urls = await Promise.all(files.map(uploadToCloudinary));
+        const markdownImages = urls.map((url) => `![](${url})`).join("\n");
+        setContent((prevContent) => prevContent + "\n" + markdownImages);
+      } catch (error) {
+        toast({
+          title: "Image upload failed",
+          description: error instanceof Error ? error.message : "Unknown error",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleToolbarImageUpload = async (
+    files: Array<File>,
+    callback: (urls: string[]) => void
+  ) => {
+    try {
+      // Upload all selected files to Cloudinary
+      const urls = await Promise.all(files.map(uploadToCloudinary));
+
+      // Pass the uploaded URLs to the editor's callback as an array
+      callback(urls);
+    } catch (error) {
+      // Debugging: Log any errors
+      console.error("Image upload error:", error);
+
+      toast({
+        title: "Image upload failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
   const onSubmit = async (data: NewPostFormValues) => {
     try {
       await handleSave(data);
-      alert("Post saved successfully!");
       toast({
         title: "Post saved successfully!",
         description: "Your post has been saved.",
       });
     } catch (error) {
-      console.error(error);
       toast({
         title: "Error saving post",
         description:
@@ -140,6 +204,12 @@ export default function NewPostEditor({
                     setContent(value);
                     setValue("content", value);
                   }}
+                  onDrop={(e) =>
+                    handleImagePasteOrDrop(e.dataTransfer, setContent)
+                  }
+                  onUploadImg={(files, callback) =>
+                    handleToolbarImageUpload(files, callback)
+                  }
                   language="en-US"
                   theme={currentTheme === "dark" ? "dark" : "light"}
                 />
@@ -148,6 +218,7 @@ export default function NewPostEditor({
                   <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
                 </div>
               )}
+
               {errors.content && (
                 <p className="text-sm text-red-500">{errors.content.message}</p>
               )}

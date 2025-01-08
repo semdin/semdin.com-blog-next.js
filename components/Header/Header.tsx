@@ -16,9 +16,14 @@ type Category = {
 type HeaderProps = {
   categories: Category[];
   isAuthenticated: boolean;
+  isAdmin: boolean;
 };
 
-export default function Header({ categories, isAuthenticated }: HeaderProps) {
+export default function Header({
+  categories,
+  isAuthenticated,
+  isAdmin,
+}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const NavItems = () => (
@@ -51,7 +56,8 @@ export default function Header({ categories, isAuthenticated }: HeaderProps) {
     );
 
   const NewPostButton = () =>
-    isAuthenticated && (
+    isAuthenticated &&
+    isAdmin && (
       <Link href="/new-post">
         <Button variant="outline">
           <TbCodePlus />
