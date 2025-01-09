@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,14 +7,13 @@ import * as z from "zod";
 import { MdEditor } from "md-editor-rt";
 import "md-editor-rt/lib/style.css";
 import { useTheme } from "next-themes";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -39,11 +38,11 @@ type NewPostFormValues = z.infer<typeof newPostSchema>;
 async function uploadToCloudinary(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET!); // Use the preset from .env
+  formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET!);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, // Dynamic cloud name
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
     {
       method: "POST",
       body: formData,
@@ -54,7 +53,7 @@ async function uploadToCloudinary(file: File): Promise<string> {
   if (!response.ok) {
     throw new Error(data.error?.message || "Failed to upload image");
   }
-  return data.secure_url; // Return the uploaded image URL
+  return data.secure_url;
 }
 
 export default function NewPostEditor({
@@ -65,6 +64,8 @@ export default function NewPostEditor({
   handleSave: (data: NewPostFormValues) => Promise<void>;
 }) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   const [content, setContent] = useState("");
@@ -81,6 +82,41 @@ export default function NewPostEditor({
 
   useEffect(() => {
     setIsMounted(true);
+
+    // Add global dragover and dragleave listeners
+    const handleWindowDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      if (e.dataTransfer?.types.includes("Files")) {
+        setIsDraggingFile(true);
+      }
+    };
+
+    const handleWindowDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      // Only handle drag leave when leaving the window
+      if (
+        e.clientX <= 0 ||
+        e.clientY <= 0 ||
+        e.clientX >= window.innerWidth ||
+        e.clientY >= window.innerHeight
+      ) {
+        setIsDraggingFile(false);
+      }
+    };
+
+    const handleWindowDrop = () => {
+      setIsDraggingFile(false);
+    };
+
+    window.addEventListener("dragover", handleWindowDragOver);
+    window.addEventListener("dragleave", handleWindowDragLeave);
+    window.addEventListener("drop", handleWindowDrop);
+
+    return () => {
+      window.removeEventListener("dragover", handleWindowDragOver);
+      window.removeEventListener("dragleave", handleWindowDragLeave);
+      window.removeEventListener("drop", handleWindowDrop);
+    };
   }, []);
 
   const handleImagePasteOrDrop = async (
@@ -96,16 +132,26 @@ export default function NewPostEditor({
     }
 
     if (files.length > 0) {
+      setIsUploading(true);
+      setIsDraggingFile(false);
       try {
         const urls = await Promise.all(files.map(uploadToCloudinary));
         const markdownImages = urls.map((url) => `![](${url})`).join("\n");
         setContent(content + "\n" + markdownImages);
+        toast({
+          title: "Image upload successful",
+          description: `Successfully uploaded ${files.length} image${
+            files.length > 1 ? "s" : ""
+          }`,
+        });
       } catch (error) {
         toast({
           title: "Image upload failed",
           description: error instanceof Error ? error.message : "Unknown error",
           variant: "destructive",
         });
+      } finally {
+        setIsUploading(false);
       }
     }
   };
@@ -114,21 +160,25 @@ export default function NewPostEditor({
     files: Array<File>,
     callback: (urls: string[]) => void
   ) => {
+    setIsUploading(true);
     try {
-      // Upload all selected files to Cloudinary
       const urls = await Promise.all(files.map(uploadToCloudinary));
-
-      // Pass the uploaded URLs to the editor's callback as an array
       callback(urls);
+      toast({
+        title: "Image upload successful",
+        description: `Successfully uploaded ${files.length} image${
+          files.length > 1 ? "s" : ""
+        }`,
+      });
     } catch (error) {
-      // Debugging: Log any errors
       console.error("Image upload error:", error);
-
       toast({
         title: "Image upload failed",
         description: error instanceof Error ? error.message : "Unknown error",
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -148,6 +198,15 @@ export default function NewPostEditor({
             : "An unexpected error occurred",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer) {
+      handleImagePasteOrDrop(e.dataTransfer, setContent);
     }
   };
 
@@ -198,23 +257,42 @@ export default function NewPostEditor({
             <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
               {isMounted ? (
-                <MdEditor
-                  modelValue={content}
-                  onChange={(value) => {
-                    setContent(value);
-                    setValue("content", value);
-                  }}
-                  onDrop={(e) => {
-                    if (e.dataTransfer) {
-                      handleImagePasteOrDrop(e.dataTransfer, setContent);
-                    }
-                  }}
-                  onUploadImg={(files, callback) =>
-                    handleToolbarImageUpload(files, callback)
-                  }
-                  language="en-US"
-                  theme={currentTheme === "dark" ? "dark" : "light"}
-                />
+                <div className="relative">
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black/10 dark:bg-white/10 z-50 flex items-center justify-center backdrop-blur-sm rounded-lg">
+                      <div className="flex flex-col items-center space-y-2">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                        <p className="text-sm">Uploading image...</p>
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className={`relative ${
+                      isDraggingFile ? "ring-2 ring-primary ring-offset-2" : ""
+                    }`}
+                    onDrop={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                  >
+                    {isDraggingFile && (
+                      <div className="absolute inset-0 bg-black/5 dark:bg-white/5 z-40 flex items-center justify-center backdrop-blur-sm rounded-lg pointer-events-none">
+                        <div className="flex items-center space-x-2">
+                          <Upload className="h-6 w-6" />
+                          <p className="text-sm">Drop images here</p>
+                        </div>
+                      </div>
+                    )}
+                    <MdEditor
+                      modelValue={content}
+                      onChange={(value) => {
+                        setContent(value);
+                        setValue("content", value);
+                      }}
+                      onUploadImg={handleToolbarImageUpload}
+                      language="en-US"
+                      theme={currentTheme === "dark" ? "dark" : "light"}
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="flex justify-center items-center h-40">
                   <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
@@ -225,7 +303,11 @@ export default function NewPostEditor({
                 <p className="text-sm text-red-500">{errors.content.message}</p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || isUploading}
+            >
               {isSubmitting ? "Post is being created..." : "Save Post"}
             </Button>
           </form>

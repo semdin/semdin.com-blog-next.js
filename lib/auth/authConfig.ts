@@ -3,13 +3,25 @@ import GoogleProvider from "next-auth/providers/google";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Mailgun from "next-auth/providers/mailgun";
+import {
+  accounts,
+  Role,
+  sessions,
+  users,
+  verificationTokens,
+} from "@/db/schema";
 
 // DB connection with Drizzle ORM
 const db = drizzle(process.env.DATABASE_URL!);
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
-  adapter: DrizzleAdapter(db), // Adapter for Drizzle ORM
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
   secret: process.env.AUTH_SECRET, // Secret for token encryption and signing for sessions
   session: {
     strategy: "jwt",
@@ -32,6 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id; // Add user ID to the token
+        token.role = user.role; // Add user role to the token
       }
       return token;
     },

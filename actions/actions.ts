@@ -50,6 +50,12 @@ export async function savePost({
   }
 
   const userId = session.user?.id;
+  const userRole = session.user?.role;
+
+  if (!userId || userRole !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
   if (!title || !content || !categoryId) {
     throw new Error("Missing required fields");
   }
@@ -70,7 +76,9 @@ export async function savePost({
     })
     .returning();
 
-  return newPost;
+  const link = `/post/${newPost.slug}`;
+
+  return link;
 }
 
 // update existing post
@@ -87,6 +95,13 @@ export async function updatePost({
 }) {
   const session = await auth();
   if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const userId = session.user?.id;
+  const userRole = session.user?.role;
+
+  if (!userId || userRole !== "ADMIN") {
     throw new Error("Unauthorized");
   }
 
