@@ -99,7 +99,7 @@ export default function NewPostEditor({
       try {
         const urls = await Promise.all(files.map(uploadToCloudinary));
         const markdownImages = urls.map((url) => `![](${url})`).join("\n");
-        setContent((prevContent) => prevContent + "\n" + markdownImages);
+        setContent(content + "\n" + markdownImages);
       } catch (error) {
         toast({
           title: "Image upload failed",
@@ -204,9 +204,11 @@ export default function NewPostEditor({
                     setContent(value);
                     setValue("content", value);
                   }}
-                  onDrop={(e) =>
-                    handleImagePasteOrDrop(e.dataTransfer, setContent)
-                  }
+                  onDrop={(e) => {
+                    if (e.dataTransfer) {
+                      handleImagePasteOrDrop(e.dataTransfer, setContent);
+                    }
+                  }}
                   onUploadImg={(files, callback) =>
                     handleToolbarImageUpload(files, callback)
                   }
