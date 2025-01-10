@@ -96,7 +96,6 @@ export default function EditPostEditor({
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditPostFormValues>({

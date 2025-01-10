@@ -65,7 +65,7 @@ function preprocessMarkdown(content: string): string {
     .map((line) => {
       const match = line.match(/^(#{1,6})\s+(.*)/);
       if (match) {
-        const [_, hashes, heading] = match;
+        const [hashes, heading] = match;
         const normalizedHeading = heading.trim().toLowerCase();
 
         if (headingCounts.has(normalizedHeading)) {

@@ -11,6 +11,7 @@ import { DynamicBreadcrumb } from "@/components/Navigation/Breadcrumb";
 import { getCategories } from "@/actions/actions";
 import { Toaster } from "@/components/ui/toaster";
 import { getUserRole } from "@/lib/auth/getUserRoleServerAction";
+import { Session } from "next-auth";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -28,7 +29,7 @@ export default async function RootLayout({
   session,
 }: Readonly<{
   children: React.ReactNode;
-  session: any;
+  session: Session | null;
 }>) {
   const categories = await getCategories();
   const isAuthenticated = await checkIsAuthenticated();

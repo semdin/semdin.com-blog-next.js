@@ -2,8 +2,11 @@ import { getPostBySlug } from "@/actions/actions";
 import { CopyLink } from "@/components/Navigation/CopyLink";
 import PostContent from "@/components/Post/PostContent";
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const { slug } = await params; // Await params to handle its asynchronous nature
+type PostPageProps = Promise<{ slug: string }>;
+
+export default async function Page(props: { params: PostPageProps }) {
+  const params = await props.params;
+  const slug = params.slug;
   const post = await getPostBySlug(slug).then((res) => res[0]);
   const url = `https://localhost:3000/post/${slug}`;
 

@@ -1,6 +1,4 @@
-import { getPostBySlug, getPosts } from "@/actions/actions";
-import { CopyLink } from "@/components/Navigation/CopyLink";
-import PostContent from "@/components/Post/PostContent";
+import { getPosts } from "@/actions/actions";
 
 export default async function Page() {
   const posts = await getPosts();

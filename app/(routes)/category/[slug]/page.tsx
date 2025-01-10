@@ -1,7 +1,10 @@
 import { getPostsByCategory } from "@/actions/actions";
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const { slug } = await params;
+type CategoryPageProps = Promise<{ slug: string }>;
+
+export default async function Page(props: { params: CategoryPageProps }) {
+  const params = await props.params;
+  const slug = params.slug;
   const posts = await getPostsByCategory(slug);
 
   return (

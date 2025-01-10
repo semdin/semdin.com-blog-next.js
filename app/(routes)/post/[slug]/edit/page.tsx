@@ -1,8 +1,11 @@
 import { getPostBySlug, getCategories, updatePost } from "@/actions/actions";
 import EditPostEditor from "@/components/Post/EditPostEditor";
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const { slug } = await params;
+type EditPageProps = Promise<{ slug: string }>;
+
+export default async function Page(props: { params: EditPageProps }) {
+  const params = await props.params;
+  const slug = params.slug;
 
   // 1. Fetch post data by slug
   const postData = await getPostBySlug(slug);
