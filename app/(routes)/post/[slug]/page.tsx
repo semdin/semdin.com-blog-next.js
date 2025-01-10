@@ -8,7 +8,7 @@ export default async function Page(props: { params: PostPageProps }) {
   const params = await props.params;
   const slug = params.slug;
   const post = await getPostBySlug(slug).then((res) => res[0]);
-  const url = `https://localhost:3000/post/${slug}`;
+  const url = `/post/${slug}`;
 
   return (
     <div className="container mx-auto py-8">
