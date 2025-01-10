@@ -16,10 +16,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
   // 3. Handle server-side update
   // This function will be passed down to the editor
   const handleUpdate = async (data: {
+    originalSlug: string; // new field
     title: string;
     content: string;
     categoryId: string;
-    slug: string; // the old slug
   }) => {
     "use server"; // server action
     await updatePost(data);

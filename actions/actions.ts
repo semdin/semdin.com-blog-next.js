@@ -58,6 +58,33 @@ async function generateUniqueSlug(baseSlug: string): Promise<string> {
   }
 }
 
+// generate a unique slug for updating a post
+export async function generateUniqueSlugForUpdate(
+  baseSlug: string,
+  originalSlug: string
+): Promise<string> {
+  let finalSlug = baseSlug;
+  let counter = 2;
+
+  while (true) {
+    const existing = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.slug, finalSlug))
+      .limit(1);
+
+    // "existing" is an array.
+    // if existing.length === 0, then no post found, we can use this slug.
+    if (existing.length === 0 || existing[0].slug === originalSlug) {
+      return finalSlug;
+    }
+
+    // Otherwise, slug taken => append -2, -3, etc. and loop again
+    finalSlug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
+
 // CREATE
 export async function savePost({
   title,
@@ -88,7 +115,6 @@ export async function savePost({
     throw new Error("Missing required fields");
   }
 
-  console.log("Iam here");
   // 3. Clean up the slug
   let baseSlug = slug?.trim();
   if (!baseSlug) {
@@ -104,12 +130,9 @@ export async function savePost({
       .replace(/[^a-z0-9-]+/g, "-")
       .replace(/(^-|-$)+/g, "");
   }
-  console.log("I am here 2");
 
   // 4. Ensure slug is unique
   const finalSlug = await generateUniqueSlug(baseSlug);
-
-  console.log("I am here 3");
 
   // 5. Insert
   const [newPost] = await db
@@ -123,8 +146,6 @@ export async function savePost({
     })
     .returning();
 
-  console.log("I am here 4");
-
   // 6. Return the new slug or entire post
   return `/post/${newPost.slug}`;
 }
@@ -135,13 +156,11 @@ export async function updatePost({
   title,
   content,
   categoryId,
-  newSlug, // user-chosen or auto
 }: {
   originalSlug: string;
   title: string;
   content: string;
   categoryId: string;
-  newSlug?: string; // optional
 }) {
   // 1. Auth check
   const session = await auth();
@@ -158,22 +177,13 @@ export async function updatePost({
     throw new Error("Missing required fields");
   }
 
-  // 2. If the user provided a new slug, clean & check. Otherwise generate from title.
-  let baseSlug = newSlug?.trim();
-  if (!baseSlug) {
-    baseSlug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
-  } else {
-    baseSlug = baseSlug
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
-  }
+  const baseSlug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 
   // 3. Ensure uniqueness
-  const finalSlug = await generateUniqueSlug(baseSlug);
+  const finalSlug = await generateUniqueSlugForUpdate(baseSlug, originalSlug);
 
   // 4. Update the post
   const [updatedPost] = await db
