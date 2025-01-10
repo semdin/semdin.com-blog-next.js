@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,14 +26,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
+// 1. Extend your schema with an optional "slug" field
 const newPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
   categoryId: z.string().min(1, "Category is required"),
   content: z.string().min(1, "Content is required"),
+  slug: z
+    .string()
+    .max(100, "Slug is too long")
+    .regex(/^[a-zA-Z0-9-_]*$/, "Only letters, numbers, dashes, underscores")
+    .optional(),
 });
 
 type NewPostFormValues = z.infer<typeof newPostSchema>;
+
+// If you have a real interface for category shape, you can use that
+interface Category {
+  id: string;
+  name: string;
+}
 
 async function uploadToCloudinary(file: File): Promise<string> {
   const formData = new FormData();
@@ -60,40 +73,76 @@ export default function NewPostEditor({
   categories,
   handleSave,
 }: {
-  categories: { id: string; name: string }[];
-  handleSave: (data: NewPostFormValues) => Promise<void>;
+  categories: Category[];
+  // handleSave is provided from page.tsx, which calls the server action
+  handleSave: (data: NewPostFormValues) => Promise<string | void>;
 }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [content, setContent] = useState("");
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
-  const [content, setContent] = useState("");
   const { toast } = useToast();
+  const router = useRouter();
 
+  // 2. React Hook Form
   const {
     register,
     handleSubmit,
+    watch,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<NewPostFormValues>({
     resolver: zodResolver(newPostSchema),
   });
 
+  // 3. Slug checking
+  const watchSlug = watch("slug"); // watch the slug field
+  const [slugIsTaken, setSlugIsTaken] = useState(false);
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false);
+
+  useEffect(() => {
+    // If no slug, no need to check
+    if (!watchSlug) {
+      setSlugIsTaken(false);
+      return;
+    }
+
+    let active = true;
+    setIsCheckingSlug(true);
+
+    fetch(`/api/posts/slug-exists?slug=${encodeURIComponent(watchSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (active) {
+          setSlugIsTaken(data.exists);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsCheckingSlug(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [watchSlug]);
+
+  // 4. On mount, set up drag listeners
   useEffect(() => {
     setIsMounted(true);
 
-    // Add global dragover and dragleave listeners
-    const handleWindowDragOver = (e: DragEvent) => {
+    function handleWindowDragOver(e: DragEvent) {
       e.preventDefault();
       if (e.dataTransfer?.types.includes("Files")) {
         setIsDraggingFile(true);
       }
-    };
+    }
 
-    const handleWindowDragLeave = (e: DragEvent) => {
+    function handleWindowDragLeave(e: DragEvent) {
       e.preventDefault();
-      // Only handle drag leave when leaving the window
       if (
         e.clientX <= 0 ||
         e.clientY <= 0 ||
@@ -102,11 +151,11 @@ export default function NewPostEditor({
       ) {
         setIsDraggingFile(false);
       }
-    };
+    }
 
-    const handleWindowDrop = () => {
+    function handleWindowDrop() {
       setIsDraggingFile(false);
-    };
+    }
 
     window.addEventListener("dragover", handleWindowDragOver);
     window.addEventListener("dragleave", handleWindowDragLeave);
@@ -119,6 +168,7 @@ export default function NewPostEditor({
     };
   }, []);
 
+  // 5. Image uploads
   const handleImagePasteOrDrop = async (
     dataTransfer: DataTransfer,
     setContent: (value: string) => void
@@ -138,6 +188,7 @@ export default function NewPostEditor({
         const urls = await Promise.all(files.map(uploadToCloudinary));
         const markdownImages = urls.map((url) => `![](${url})`).join("\n");
         setContent(content + "\n" + markdownImages);
+
         toast({
           title: "Image upload successful",
           description: `Successfully uploaded ${files.length} image${
@@ -156,6 +207,7 @@ export default function NewPostEditor({
     }
   };
 
+  // 5B. Toolbar image upload
   const handleToolbarImageUpload = async (
     files: Array<File>,
     callback: (urls: string[]) => void
@@ -182,13 +234,38 @@ export default function NewPostEditor({
     }
   };
 
-  const onSubmit = async (data: NewPostFormValues) => {
-    try {
-      await handleSave(data);
+  // 6. Form submit
+  const onSubmit = async (formData: NewPostFormValues) => {
+    // If slug is taken, prevent submission
+    if (slugIsTaken) {
       toast({
-        title: "Post saved successfully!",
-        description: "Your post has been saved.",
+        title: "Slug in use",
+        description: "Please use a different slug before saving",
+        variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      // Call the server action passed as prop from page.tsx
+      const link = await handleSave({
+        ...formData,
+      });
+
+      // If your `handleSave` (server action) returns a link, you can redirect
+      if (typeof link === "string") {
+        toast({
+          title: "Post saved successfully!",
+          description: "Redirecting to your new post...",
+        });
+        router.push(link);
+      } else {
+        // If there's no returned link, just show success
+        toast({
+          title: "Post saved successfully!",
+          description: "Your post has been saved.",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error saving post",
@@ -201,6 +278,7 @@ export default function NewPostEditor({
     }
   };
 
+  // 7. Handle dropping images
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -221,6 +299,7 @@ export default function NewPostEditor({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -232,10 +311,35 @@ export default function NewPostEditor({
                 <p className="text-sm text-red-500">{errors.title.message}</p>
               )}
             </div>
+
+            {/* Slug (optional) */}
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug (optional)</Label>
+              <Input
+                id="slug"
+                {...register("slug")}
+                placeholder="my-custom-post"
+              />
+              {errors.slug && (
+                <p className="text-sm text-red-500">{errors.slug.message}</p>
+              )}
+
+              {isCheckingSlug && <p className="text-sm">Checking slug...</p>}
+              {slugIsTaken && (
+                <p className="text-sm text-red-500">
+                  This slug is already in use. Please choose a different one.
+                </p>
+              )}
+            </div>
+
+            {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select
-                onValueChange={(value: string) => setValue("categoryId", value)}
+                onValueChange={(value: string) => {
+                  // update form value
+                  return setValue("categoryId", value);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
@@ -254,6 +358,8 @@ export default function NewPostEditor({
                 </p>
               )}
             </div>
+
+            {/* Content */}
             <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
               {isMounted ? (
@@ -298,15 +404,16 @@ export default function NewPostEditor({
                   <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
                 </div>
               )}
-
               {errors.content && (
                 <p className="text-sm text-red-500">{errors.content.message}</p>
               )}
             </div>
+
+            {/* Submit */}
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting || isUploading}
+              disabled={isSubmitting || isUploading || slugIsTaken}
             >
               {isSubmitting ? "Post is being created..." : "Save Post"}
             </Button>

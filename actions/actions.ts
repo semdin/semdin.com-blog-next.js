@@ -35,93 +35,162 @@ export async function getPosts() {
   return await db.select().from(posts);
 }
 
+async function generateUniqueSlug(baseSlug: string): Promise<string> {
+  let finalSlug = baseSlug;
+  let counter = 2;
+
+  while (true) {
+    const existing = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.slug, finalSlug))
+      .limit(1);
+
+    // "existing" is an array.
+    // if existing.length === 0, then no post found, we can use this slug.
+    if (existing.length === 0) {
+      return finalSlug;
+    }
+
+    // Otherwise, slug taken => append -2, -3, etc. and loop again
+    finalSlug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
+
+// CREATE
 export async function savePost({
   title,
   content,
   categoryId,
+  slug,
 }: {
   title: string;
   content: string;
   categoryId: string;
+  slug?: string; // optional
 }) {
-  const session = await auth();
+  // 1. Auth check
+  const session = await auth(); // or however you get session in v5
   if (!session) {
     throw new Error("Unauthorized");
   }
-
-  const userId = session.user?.id;
-  const userRole = session.user?.role;
-
+  const userId = session.user.id;
+  const userRole = session.user.role;
+  console.log("userId", userId);
+  console.log("userRole", userRole);
   if (!userId || userRole !== "ADMIN") {
     throw new Error("Unauthorized");
   }
 
+  // 2. Required fields check
   if (!title || !content || !categoryId) {
     throw new Error("Missing required fields");
   }
 
-  const slug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
+  console.log("Iam here");
+  // 3. Clean up the slug
+  let baseSlug = slug?.trim();
+  if (!baseSlug) {
+    // If user left slug blank, auto-generate from title
+    baseSlug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  } else {
+    // If user typed a slug, let's do a light cleaning
+    baseSlug = baseSlug
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  }
+  console.log("I am here 2");
 
+  // 4. Ensure slug is unique
+  const finalSlug = await generateUniqueSlug(baseSlug);
+
+  console.log("I am here 3");
+
+  // 5. Insert
   const [newPost] = await db
     .insert(posts)
     .values({
       title,
-      slug,
+      slug: finalSlug,
       content,
-      userId: userId,
-      categoryId: categoryId,
+      userId,
+      categoryId,
     })
     .returning();
 
-  const link = `/post/${newPost.slug}`;
+  console.log("I am here 4");
 
-  return link;
+  // 6. Return the new slug or entire post
+  return `/post/${newPost.slug}`;
 }
 
-// update existing post
+// UPDATE
 export async function updatePost({
+  originalSlug, // old slug
   title,
   content,
   categoryId,
-  slug, // old slug from the URL
+  newSlug, // user-chosen or auto
 }: {
+  originalSlug: string;
   title: string;
   content: string;
   categoryId: string;
-  slug: string;
+  newSlug?: string; // optional
 }) {
+  // 1. Auth check
   const session = await auth();
   if (!session) {
     throw new Error("Unauthorized");
   }
-
-  const userId = session.user?.id;
-  const userRole = session.user?.role;
-
+  const userId = session.user.id;
+  const userRole = session.user.role;
   if (!userId || userRole !== "ADMIN") {
     throw new Error("Unauthorized");
   }
 
-  // Re-generate slug from the new title
-  const newSlug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
+  if (!originalSlug || !title || !content || !categoryId) {
+    throw new Error("Missing required fields");
+  }
 
-  // Update the post
+  // 2. If the user provided a new slug, clean & check. Otherwise generate from title.
+  let baseSlug = newSlug?.trim();
+  if (!baseSlug) {
+    baseSlug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  } else {
+    baseSlug = baseSlug
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  }
+
+  // 3. Ensure uniqueness
+  const finalSlug = await generateUniqueSlug(baseSlug);
+
+  // 4. Update the post
   const [updatedPost] = await db
     .update(posts)
     .set({
       title,
       content,
       categoryId,
-      slug: newSlug,
+      slug: finalSlug,
     })
-    .where(eq(posts.slug, slug)) // find by old slug
+    .where(eq(posts.slug, originalSlug))
     .returning();
 
-  return updatedPost;
+  if (!updatedPost) {
+    throw new Error("Post not found or update failed.");
+  }
+
+  // 5. Return new slug or updated record
+  return `/post/${updatedPost.slug}`;
 }

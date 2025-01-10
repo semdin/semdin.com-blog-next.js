@@ -10,6 +10,7 @@ import {
   users,
   verificationTokens,
 } from "@/db/schema";
+import { clearStaleTokens } from "./clearStaleTokenServerAction";
 
 // DB connection with Drizzle ORM
 const db = drizzle(process.env.DATABASE_URL!);
@@ -43,6 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        await clearStaleTokens(); // Clear stale tokens
         token.id = user.id; // Add user ID to the token
         token.role = user.role; // Add user role to the token
       }
@@ -51,6 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (token?.id) {
         session.user.id = token.id as string; // Add user ID to the session
+        session.user.role = token.role as Role; // Add user role to the session
       }
       return session;
     },
