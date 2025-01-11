@@ -1,28 +1,13 @@
-import React from "react";
+import { getPostsWithCategories } from "@/actions/actions";
+import HomePage from "@/components/Home/HomePage";
 
-export default function Page() {
+export default async function Page() {
+  const postsWithCategories = await getPostsWithCategories();
+  const featuredPosts = postsWithCategories.filter(
+    (post) => post.status === "FEATURED"
+  );
+
   return (
-    <>
-      <div className="flex flex-col justify-center items-center pt-[800px]">
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-        <h1>Hello Next.js!</h1>
-      </div>
-    </>
+    <HomePage featuredPosts={featuredPosts} allPosts={postsWithCategories} />
   );
 }

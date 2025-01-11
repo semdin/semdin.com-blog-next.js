@@ -7,7 +7,7 @@ import * as z from "zod";
 import { MdEditor } from "md-editor-rt";
 import "md-editor-rt/lib/style.css";
 import { useTheme } from "next-themes";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Check, ChevronsUpDown } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -18,20 +18,27 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
-// 1. Extend your schema with an optional "slug" field
+// 1. Update schema: categoryIds = array of strings
 const newPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  categoryId: z.string().min(1, "Category is required"),
+  categoryIds: z.array(z.string()).min(1, "Select at least one category"),
   content: z.string().min(1, "Content is required"),
   slug: z
     .string()
@@ -42,12 +49,13 @@ const newPostSchema = z.object({
 
 type NewPostFormValues = z.infer<typeof newPostSchema>;
 
-// If you have a real interface for category shape, you can use that
+// Category interface for props
 interface Category {
   id: string;
   name: string;
 }
 
+// Mocked Cloudinary uploader
 async function uploadToCloudinary(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
@@ -74,7 +82,6 @@ export default function NewPostEditor({
   handleSave,
 }: {
   categories: Category[];
-  // handleSave is provided from page.tsx, which calls the server action
   handleSave: (data: NewPostFormValues) => Promise<string | void>;
 }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -86,7 +93,7 @@ export default function NewPostEditor({
   const { toast } = useToast();
   const router = useRouter();
 
-  // 2. React Hook Form
+  // 2. Setup form for multi-category
   const {
     register,
     handleSubmit,
@@ -95,20 +102,21 @@ export default function NewPostEditor({
     formState: { errors, isSubmitting },
   } = useForm<NewPostFormValues>({
     resolver: zodResolver(newPostSchema),
+    defaultValues: {
+      // We'll store the chosen categories here
+      categoryIds: [],
+    },
   });
 
-  // 3. Slug checking
-  const watchSlug = watch("slug"); // watch the slug field
+  // Slug checking logic (unchanged from your snippet)
+  const watchSlug = watch("slug");
   const [slugIsTaken, setSlugIsTaken] = useState(false);
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
-
   useEffect(() => {
-    // If no slug, no need to check
     if (!watchSlug) {
       setSlugIsTaken(false);
       return;
     }
-
     let active = true;
     setIsCheckingSlug(true);
 
@@ -130,17 +138,15 @@ export default function NewPostEditor({
     };
   }, [watchSlug]);
 
-  // 4. On mount, set up drag listeners
+  // On mount, set up drag listeners
   useEffect(() => {
     setIsMounted(true);
-
     function handleWindowDragOver(e: DragEvent) {
       e.preventDefault();
       if (e.dataTransfer?.types.includes("Files")) {
         setIsDraggingFile(true);
       }
     }
-
     function handleWindowDragLeave(e: DragEvent) {
       e.preventDefault();
       if (
@@ -152,15 +158,12 @@ export default function NewPostEditor({
         setIsDraggingFile(false);
       }
     }
-
     function handleWindowDrop() {
       setIsDraggingFile(false);
     }
-
     window.addEventListener("dragover", handleWindowDragOver);
     window.addEventListener("dragleave", handleWindowDragLeave);
     window.addEventListener("drop", handleWindowDrop);
-
     return () => {
       window.removeEventListener("dragover", handleWindowDragOver);
       window.removeEventListener("dragleave", handleWindowDragLeave);
@@ -168,7 +171,7 @@ export default function NewPostEditor({
     };
   }, []);
 
-  // 5. Image uploads
+  // Image uploads (paste or drop)
   const handleImagePasteOrDrop = async (
     dataTransfer: DataTransfer,
     setContent: (value: string) => void
@@ -180,7 +183,6 @@ export default function NewPostEditor({
         files.push(file);
       }
     }
-
     if (files.length > 0) {
       setIsUploading(true);
       setIsDraggingFile(false);
@@ -188,7 +190,6 @@ export default function NewPostEditor({
         const urls = await Promise.all(files.map(uploadToCloudinary));
         const markdownImages = urls.map((url) => `![](${url})`).join("\n");
         setContent(content + "\n" + markdownImages);
-
         toast({
           title: "Image upload successful",
           description: `Successfully uploaded ${files.length} image${
@@ -207,7 +208,7 @@ export default function NewPostEditor({
     }
   };
 
-  // 5B. Toolbar image upload
+  // Toolbar image upload
   const handleToolbarImageUpload = async (
     files: Array<File>,
     callback: (urls: string[]) => void
@@ -234,9 +235,8 @@ export default function NewPostEditor({
     }
   };
 
-  // 6. Form submit
+  // 3. On submit
   const onSubmit = async (formData: NewPostFormValues) => {
-    // If slug is taken, prevent submission
     if (slugIsTaken) {
       toast({
         title: "Slug in use",
@@ -245,14 +245,8 @@ export default function NewPostEditor({
       });
       return;
     }
-
     try {
-      // Call the server action passed as prop from page.tsx
-      const link = await handleSave({
-        ...formData,
-      });
-
-      // If your `handleSave` (server action) returns a link, you can redirect
+      const link = await handleSave(formData);
       if (typeof link === "string") {
         toast({
           title: "Post saved successfully!",
@@ -260,7 +254,6 @@ export default function NewPostEditor({
         });
         router.push(link);
       } else {
-        // If there's no returned link, just show success
         toast({
           title: "Post saved successfully!",
           description: "Your post has been saved.",
@@ -278,13 +271,33 @@ export default function NewPostEditor({
     }
   };
 
-  // 7. Handle dropping images
+  // Handle dropping images
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (e.dataTransfer) {
       handleImagePasteOrDrop(e.dataTransfer, setContent);
+    }
+  };
+
+  // 4. State for toggling the multi-category popover
+  const [openCategories, setOpenCategories] = useState(false);
+
+  // Keep track of our form's array of selected categories
+  const selectedCategoryIds = watch("categoryIds");
+
+  // Helper to toggle a category
+  const toggleCategory = (categoryId: string) => {
+    if (!selectedCategoryIds) return;
+    if (selectedCategoryIds.includes(categoryId)) {
+      // Remove it
+      setValue(
+        "categoryIds",
+        selectedCategoryIds.filter((id) => id !== categoryId)
+      );
+    } else {
+      // Add it
+      setValue("categoryIds", [...selectedCategoryIds, categoryId]);
     }
   };
 
@@ -304,8 +317,8 @@ export default function NewPostEditor({
               <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
-                {...register("title")}
                 placeholder="Enter post title"
+                {...register("title")}
               />
               {errors.title && (
                 <p className="text-sm text-red-500">{errors.title.message}</p>
@@ -323,7 +336,6 @@ export default function NewPostEditor({
               {errors.slug && (
                 <p className="text-sm text-red-500">{errors.slug.message}</p>
               )}
-
               {isCheckingSlug && <p className="text-sm">Checking slug...</p>}
               {slugIsTaken && (
                 <p className="text-sm text-red-500">
@@ -332,29 +344,66 @@ export default function NewPostEditor({
               )}
             </div>
 
-            {/* Category */}
+            {/* Multi-Category Combobox */}
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                onValueChange={(value: string) => {
-                  // update form value
-                  return setValue("categoryId", value);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.categoryId && (
+              <Label htmlFor="categories">Categories (multi-select)</Label>
+              <Popover open={openCategories} onOpenChange={setOpenCategories}>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="categories"
+                    variant="outline"
+                    role="combobox"
+                    className={cn(
+                      "w-full justify-between",
+                      !selectedCategoryIds?.length && "text-muted-foreground"
+                    )}
+                  >
+                    {selectedCategoryIds?.length
+                      ? categories
+                          .filter((cat) => selectedCategoryIds.includes(cat.id))
+                          .map((cat) => cat.name)
+                          .join(", ")
+                      : "Select categories"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[50vw] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search categories..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <CommandEmpty>No categories found</CommandEmpty>
+                      <CommandGroup>
+                        {categories.map((category) => {
+                          const isSelected = selectedCategoryIds?.includes(
+                            category.id
+                          );
+                          return (
+                            <CommandItem
+                              key={category.id}
+                              onSelect={() => toggleCategory(category.id)}
+                            >
+                              {category.name}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  isSelected ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {/* Show error if no category is chosen */}
+              {errors.categoryIds && (
                 <p className="text-sm text-red-500">
-                  {errors.categoryId.message}
+                  {errors.categoryIds.message as string}
                 </p>
               )}
             </div>
@@ -379,14 +428,6 @@ export default function NewPostEditor({
                     onDrop={handleDrop}
                     onDragOver={(e) => e.preventDefault()}
                   >
-                    {isDraggingFile && (
-                      <div className="absolute inset-0 bg-black/5 dark:bg-white/5 z-40 flex items-center justify-center backdrop-blur-sm rounded-lg pointer-events-none">
-                        <div className="flex items-center space-x-2">
-                          <Upload className="h-6 w-6" />
-                          <p className="text-sm">Drop images here</p>
-                        </div>
-                      </div>
-                    )}
                     <MdEditor
                       modelValue={content}
                       onChange={(value) => {

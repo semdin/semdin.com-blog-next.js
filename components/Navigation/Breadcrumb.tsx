@@ -10,7 +10,7 @@ export function DynamicBreadcrumb() {
 
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="flex items-center space-x-2">
+      <ol className="flex items-center">
         <li>
           <Link href="/" className="text-gray-500 hover:text-gray-700">
             Home
@@ -23,7 +23,7 @@ export function DynamicBreadcrumb() {
 
           return (
             <li key={path} className="flex items-center">
-              <ChevronRight className="w-4 h-4 text-gray-400 mx-1" />
+              <ChevronRight className="h-4 text-gray-400 mx-1" />
               {isLast ? (
                 <span className="text-gray-900 font-medium dark:text-white">
                   {title}

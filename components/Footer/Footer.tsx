@@ -3,7 +3,17 @@ import Link from "next/link";
 import { FaGithub, FaYoutube, FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
 
-export const Footer = () => {
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type FooterProps = {
+  categories: Category[];
+};
+
+export const Footer = ({ categories }: FooterProps) => {
   return (
     <footer>
       <div className="flex flex-col items-center justify-center py-8 text-center md:py-12 lg:py-16">
@@ -22,33 +32,29 @@ export const Footer = () => {
         </div>
         <nav className="flex items-center justify-center gap-4 mt-4 text-sm md:mt-6 md:gap-6">
           <Link
-            href="#"
+            href="/"
             className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
             prefetch={false}
           >
             Home
           </Link>
           <Link
-            href="#"
+            href="about"
             className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
             prefetch={false}
           >
-            Features
+            About
           </Link>
-          <Link
-            href="#"
-            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-            prefetch={false}
-          >
-            Pricing
-          </Link>
-          <Link
-            href="#"
-            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-            prefetch={false}
-          >
-            Contact
-          </Link>
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/category/${category.slug}`}
+              className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+              prefetch={false}
+            >
+              {category.name}
+            </Link>
+          ))}
         </nav>
         <div className="flex items-center justify-center gap-4 mt-4 md:mt-8">
           <Link

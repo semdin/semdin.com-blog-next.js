@@ -41,7 +41,7 @@ export default async function RootLayout({
         className={`
           ${poppins.variable}
           antialiased
-          flex flex-col min-h-screen w-[100vw] overflow-x-hidden
+          flex flex-col min-h-screen w-[100vw] overflow-x-hidden overflow-y-scroll
         `}
       >
         <SessionProvider session={session}>
@@ -59,17 +59,15 @@ export default async function RootLayout({
             />
 
             {/* Main content area */}
-            <main className="container px-3 py-2 mx-auto flex-grow flex flex-col pt-16">
+            <main className="container py-2 mx-auto flex-grow flex flex-col pt-16">
               {/* Dynamic Breadcrumb */}
-              <div>
-                <DynamicBreadcrumb />
-              </div>
-              <div className="container mx-auto">{children}</div>
+              <DynamicBreadcrumb />
+              {children}
             </main>
             <Toaster />
 
             {/* Footer */}
-            <Footer />
+            <Footer categories={categories} />
           </ThemeProvider>
         </SessionProvider>
       </body>

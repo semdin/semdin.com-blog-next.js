@@ -26,7 +26,7 @@ export function enumToPgEnum<T extends Record<string, any>>(
 export const authRole = pgEnum("AuthRole", enumToPgEnum(Role));
 
 export const users = pgTable("user", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
@@ -39,7 +39,7 @@ export const users = pgTable("user", {
 export const accounts = pgTable(
   "account",
   {
-    userId: text("userId")
+    userId: uuid("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
@@ -60,7 +60,7 @@ export const accounts = pgTable(
 
 export const sessions = pgTable("session", {
   sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
+  userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
@@ -84,7 +84,7 @@ export const authenticators = pgTable(
   "authenticator",
   {
     credentialID: text("credentialID").notNull().unique(),
-    userId: text("userId")
+    userId: uuid("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     providerAccountId: text("providerAccountId").notNull(),
@@ -113,11 +113,25 @@ export const posts = pgTable("posts", {
   title: varchar("title", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull(),
   content: text("content").notNull(),
-  userId: text("user_id").references(() => users.id),
-  categoryId: uuid("category_id")
-    .references(() => categories.id)
-    .notNull(),
+  userId: uuid("user_id").references(() => users.id), // or text("user_id") if that's how your users.id is defined
   status: varchar("status", { length: 50 }).default("draft"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const postCategories = pgTable(
+  "post_categories",
+  {
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id),
+  },
+  (table) => {
+    return {
+      pk: primaryKey(table.postId, table.categoryId),
+    };
+  }
+);

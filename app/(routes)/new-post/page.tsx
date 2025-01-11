@@ -17,7 +17,7 @@ export default async function Page() {
   const handleSave = async (data: {
     title: string;
     content: string;
-    categoryId: string;
+    categoryIds: string[];
     slug?: string; // new slug field
   }) => {
     "use server";

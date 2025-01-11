@@ -7,7 +7,7 @@ import * as z from "zod";
 import { MdEditor } from "md-editor-rt";
 import "md-editor-rt/lib/style.css";
 import { useTheme } from "next-themes";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, Check, ChevronsUpDown } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -18,23 +18,29 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandGroup,
+  CommandList,
+  CommandItem,
+  CommandEmpty,
+  CommandInput,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 // ----------------------
-// 1. Zod Schema
+// 1. Zod Schema (multi-category)
 // ----------------------
-// We define BOTH the original slug (required) and the new slug (optional).
 const editPostSchema = z.object({
   originalSlug: z.string().min(1, "Original slug is required"),
   title: z.string().min(1, "Title is required"),
-  categoryId: z.string().min(1, "Category is required"),
+  categoryIds: z.array(z.string()).min(1, "Select at least one category"),
   content: z.string().min(1, "Content is required"),
 });
 
@@ -74,9 +80,9 @@ export default function EditPostEditor({
 }: {
   post: {
     title: string;
-    slug?: string; // the old slug from DB
+    slug: string; // the old slug from DB
     content: string;
-    categoryId: string;
+    categoryIds: string[]; // now an array
   };
   categories: Category[];
   handleUpdate: (data: EditPostFormValues) => Promise<void>;
@@ -96,20 +102,43 @@ export default function EditPostEditor({
   const {
     register,
     handleSubmit,
+    watch,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditPostFormValues>({
     resolver: zodResolver(editPostSchema),
     defaultValues: {
       // The old slug is your "originalSlug"
-      originalSlug: post.slug ?? "",
+      originalSlug: post.slug,
       title: post.title,
       content: post.content,
-      categoryId: post.categoryId,
+      // multiple category IDs
+      categoryIds: post.categoryIds ?? [],
     },
   });
 
-  // 4. Drag event listeners
+  // 3. Watch the current selected category IDs
+  const selectedCategoryIds = watch("categoryIds");
+
+  // 4. We'll manage the popover state locally
+  const [openCategories, setOpenCategories] = useState(false);
+
+  // 5. Toggle category logic
+  const toggleCategory = (categoryId: string) => {
+    const current = watch("categoryIds");
+    if (current.includes(categoryId)) {
+      // remove it
+      setValue(
+        "categoryIds",
+        current.filter((id) => id !== categoryId)
+      );
+    } else {
+      // add it
+      setValue("categoryIds", [...current, categoryId]);
+    }
+  };
+
+  // 6. Drag event listeners
   useEffect(() => {
     setIsMounted(true);
 
@@ -145,7 +174,7 @@ export default function EditPostEditor({
     };
   }, []);
 
-  // 5. Image handling
+  // 7. Image handling
   const handleImagePasteOrDrop = async (
     dataTransfer: DataTransfer,
     setContentValue: (cb: (prev: string) => string) => void
@@ -185,7 +214,7 @@ export default function EditPostEditor({
     }
   };
 
-  // 5B. Toolbar image upload
+  // 7B. Toolbar image upload
   const handleToolbarImageUpload = async (
     files: Array<File>,
     callback: (urls: string[]) => void
@@ -211,7 +240,7 @@ export default function EditPostEditor({
     }
   };
 
-  // 6. OnSubmit
+  // 8. onSubmit
   const onSubmit = async (formData: EditPostFormValues) => {
     try {
       await handleUpdate(formData);
@@ -231,7 +260,7 @@ export default function EditPostEditor({
     }
   };
 
-  // 7. Handle dropping images
+  // 9. Handle dropping images
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -271,30 +300,67 @@ export default function EditPostEditor({
             </div>
 
             {/* Original Slug (hidden) */}
-            {/* We keep the old slug hidden, so we know which post to update */}
             <input type="hidden" {...register("originalSlug")} />
 
-            {/* Category */}
+            {/* Multi-Category Combobox */}
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                onValueChange={(value: string) => setValue("categoryId", value)}
-                defaultValue={post.categoryId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.categoryId && (
+              <Label htmlFor="categories">Categories (multi-select)</Label>
+              <Popover open={openCategories} onOpenChange={setOpenCategories}>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="categories"
+                    variant="outline"
+                    role="combobox"
+                    className={cn(
+                      "w-full justify-between",
+                      !selectedCategoryIds?.length && "text-muted-foreground"
+                    )}
+                  >
+                    {selectedCategoryIds?.length
+                      ? categories
+                          .filter((cat) => selectedCategoryIds.includes(cat.id))
+                          .map((cat) => cat.name)
+                          .join(", ")
+                      : "Select categories"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[50vw] left-0 right-0 p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search categories..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <CommandEmpty>No categories found</CommandEmpty>
+                      <CommandGroup>
+                        {categories.map((category) => {
+                          const isSelected = selectedCategoryIds.includes(
+                            category.id
+                          );
+                          return (
+                            <CommandItem
+                              key={category.id}
+                              onSelect={() => toggleCategory(category.id)}
+                            >
+                              {category.name}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  isSelected ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {errors.categoryIds && (
                 <p className="text-sm text-red-500">
-                  {errors.categoryId.message}
+                  {errors.categoryIds.message as string}
                 </p>
               )}
             </div>

@@ -1,4 +1,8 @@
-import { getPostBySlug, getCategories, updatePost } from "@/actions/actions";
+import {
+  getPostBySlugWithCategories,
+  getCategories,
+  updatePost,
+} from "@/actions/actions";
 import EditPostEditor from "@/components/Post/EditPostEditor";
 
 type EditPageProps = Promise<{ slug: string }>;
@@ -8,7 +12,7 @@ export default async function Page(props: { params: EditPageProps }) {
   const slug = params.slug;
 
   // 1. Fetch post data by slug
-  const postData = await getPostBySlug(slug);
+  const postData = await getPostBySlugWithCategories(slug);
   // `getPostBySlug` returns an array (based on the code).
   // So we should get the first element if it’s not empty:
   const post = postData?.[0];
@@ -22,7 +26,7 @@ export default async function Page(props: { params: EditPageProps }) {
     originalSlug: string; // new field
     title: string;
     content: string;
-    categoryId: string;
+    categoryIds: string[];
   }) => {
     "use server"; // server action
     await updatePost(data);

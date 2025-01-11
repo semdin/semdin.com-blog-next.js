@@ -41,7 +41,7 @@ export default function PostContent({ content }: { content: string }) {
           </div>
         )}
       </div>
-      <div className="w-64">
+      <div className="w-64 hidden lg:block">
         <div className="sticky top-20 max-h-screen overflow-y-auto">
           {scrollElement && (
             <MdCatalog

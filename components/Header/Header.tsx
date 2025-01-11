@@ -67,7 +67,7 @@ export default function Header({
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-background/95 md:backdrop-blur md:supports-[backdrop-filter]:bg-background/60 z-50">
-      <div className="flex justify-between w-full h-full px-4 items-center max-w-7xl mx-auto">
+      <div className="container flex justify-between w-full h-full items-center mx-auto">
         <div className="flex items-center">
           <Link href="/">
             <h1 className="font-extrabold text-xl text-[#3E7B27] hover:text-[#85A947]">
@@ -76,7 +76,7 @@ export default function Header({
           </Link>
         </div>
 
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden lg:flex items-center space-x-8">
           <nav>
             <ul className="flex space-x-4">
               <NavItems />
@@ -89,7 +89,7 @@ export default function Header({
           </div>
         </div>
 
-        <div className="md:hidden flex items-center space-x-2">
+        <div className="lg:hidden flex items-center space-x-2">
           <ModeToggle />
           <NewPostButton />
           <Button
