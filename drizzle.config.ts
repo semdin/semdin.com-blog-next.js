@@ -1,7 +1,7 @@
 import "@/env-config"; // Ensures environment variables are loaded
 import { defineConfig } from "drizzle-kit";
 
-console.log(process.env.DATABASE_URL);
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 export default defineConfig({
   out: "./drizzle",
