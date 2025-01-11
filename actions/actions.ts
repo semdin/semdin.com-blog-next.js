@@ -185,8 +185,6 @@ export async function savePost({
   }
   const userId = session.user.id;
   const userRole = session.user.role;
-  console.log("userId", userId);
-  console.log("userRole", userRole);
   if (!userId || userRole !== "ADMIN") {
     throw new Error("Unauthorized");
   }
