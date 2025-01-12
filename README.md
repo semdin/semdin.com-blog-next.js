@@ -10,6 +10,13 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - **Responsive Design**: Optimized for all devices.
 - **Dark Mode**: Switch between light and dark themes.
 
+## TODO
+- Responsive Footer
+- Responsive MD editor post content
+- Comments
+- Social media share
+- SEO
+
 ## Installation
 
 ### Prerequisites
