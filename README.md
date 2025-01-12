@@ -1,10 +1,10 @@
 # semdin.com-blog-next.js
 
-semdin.com-blog-next.js is a modern blogging platform built with Next.js and TypeScript. It empowers users to create, edit, and manage blog posts efficiently, featuring a responsive design, role-based authentication, and a rich text editor.
+semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 
 ## Features
 
-- **User Authentication**: Secure login with email and Google OAuth.
+- **User Authentication**: Secure login with NextAuth and Google OAuth.
 - **Role Management**: Separate user roles for authors and admins.
 - **Rich Text Editing**: Create and edit posts with a powerful md-editor-rt editor.
 - **Responsive Design**: Optimized for all devices.
@@ -14,7 +14,7 @@ semdin.com-blog-next.js is a modern blogging platform built with Next.js and Typ
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v20 or higher)
 - npm, yarn, or pnpm (package manager)
 - Docker (optional, for running with Docker Compose)
 
@@ -82,7 +82,7 @@ Contributions are welcome! Please follow these steps:
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+Just use it don't ask :)
 
 ## Contact
 
