@@ -179,7 +179,7 @@ export async function savePost({
   slug?: string; // optional
 }) {
   // 1. Auth check
-  const session = await auth(); // or however you get session in v5
+  const session = await auth();
   if (!session) {
     throw new Error("Unauthorized");
   }
