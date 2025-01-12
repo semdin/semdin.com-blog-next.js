@@ -15,8 +15,7 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - Responsive MD editor post content
 - Comments
 - Social media share
-- SEO (title and meta tags and searchable parameters)
-- SEO for AI LLMs
+- SEO (title and meta tags and searchable parameters) also SEO for AI LLMs
 
 ## Installation
 
