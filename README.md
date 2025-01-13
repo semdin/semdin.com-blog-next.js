@@ -8,15 +8,15 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - **Role Management**: Separate user roles for authors and admins.
 - **Rich Text Editing**: Create and edit posts with a powerful md-editor-rt editor.
 - **Responsive Design**: Optimized for all devices.
-- **Dark Mode**: Switch between light and dark themes.
+- **Dark Mode**: Switch between light and dark themes and system default.
 
 ## TODO
 - Responsive Footer
 - Responsive MD editor post content
 - Comments
 - Social media share
-- SEO (title and meta tags and searchable parameters)
-- SEO for AI LLMs
+- SEO (title and meta tags and searchable parameters) also SEO for AI LLMs
+- update readme with required environment values
 
 ## Installation
 
