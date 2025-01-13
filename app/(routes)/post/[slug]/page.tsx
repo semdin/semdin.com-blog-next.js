@@ -1,15 +1,64 @@
 import { getPostBySlug } from "@/actions/actions";
+import type { Metadata, ResolvingMetadata } from "next";
 import { CopyLink } from "@/components/Navigation/CopyLink";
 import PostContent from "@/components/Post/PostContent";
 import { getUserRole } from "@/lib/auth/getUserRoleServerAction";
 import Link from "next/link";
 import { FaEdit } from "react-icons/fa";
 
-type PostPageProps = Promise<{ slug: string }>;
+type PostPageProps = { params: Promise<{ slug: string }> };
 
-export default async function Page(props: { params: PostPageProps }) {
-  const params = await props.params;
-  const slug = params.slug;
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug).then((res) => res[0]);
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+      description: "The requested post could not be found.",
+    };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://localhost:3000";
+  const postUrl = `${siteUrl}/post/${slug}`;
+  const defaultImage = `${siteUrl}/default-og-image.jpg`;
+
+  const excerpt = post.content.slice(0, 160).replace(/\s+/g, " ").trim();
+
+  return {
+    title: post.title,
+    description: excerpt,
+    openGraph: {
+      title: post.title,
+      description: excerpt,
+      url: postUrl,
+      images: [
+        {
+          url: defaultImage,
+          width: 800,
+          height: 600,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: excerpt,
+      images: [defaultImage],
+    },
+  };
+}
+
+export default async function Page({ params }: PostPageProps) {
+  const { slug } = await params;
   const post = await getPostBySlug(slug).then((res) => res[0]);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://localhost:3000";
   const url = `${siteUrl}/post/${slug}`;

@@ -11,12 +11,14 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - **Dark Mode**: Switch between light and dark themes and system default.
 
 ## TODO
-- Responsive Footer
-- Responsive MD editor post content
+
+- Responsive Footer (+)
+- Responsive MD editor post content (+)
 - Comments
-- Social media share
-- SEO (title and meta tags and searchable parameters) also SEO for AI LLMs
+- Social media share (+?)
+- SEO (title and meta tags and searchable parameters) also SEO for AI LLMs (+?)
 - update readme with required environment values
+- Create dynamic og file when user create or update post.
 
 ## Installation
 

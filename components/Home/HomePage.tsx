@@ -67,8 +67,8 @@ export default function HomePage({ featuredPosts, allPosts }: HomePageProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center">
           {/* Intro Text */}
           <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2">
-              Welcome to Semdin.com
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+              Welcome to <strong>Semdin.com</strong>
             </h1>
             <p className="text-gray-700 leading-relaxed max-w-2xl">
               Hey there! I’m <strong className="font-semibold">Mehmet</strong> a{" "}
@@ -76,9 +76,8 @@ export default function HomePage({ featuredPosts, allPosts }: HomePageProps) {
               loves <strong className="font-semibold">learning</strong>,
               <strong className="font-semibold"> discovering</strong>, and
               exploring all things tech. This blog is my personal corner of the
-              internet where I share what I&apos;ve been learning—from
-              cutting-edge frameworks to programming best practices. Join me on
-              this exciting journey!
+              internet where I share what I&apos;ve been learning in my life.
+              Join me on this exciting journey!
             </p>
           </div>
         </div>

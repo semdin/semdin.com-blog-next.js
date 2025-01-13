@@ -59,7 +59,7 @@ export default async function RootLayout({
             />
 
             {/* Main content area */}
-            <main className="container py-2 mx-auto flex-grow flex flex-col pt-16">
+            <main className="container py-2 mx-auto flex-grow flex flex-col pt-16 md:px-0 px-4">
               {/* Dynamic Breadcrumb */}
               <DynamicBreadcrumb />
               {children}
