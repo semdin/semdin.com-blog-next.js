@@ -19,6 +19,7 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - SEO (title and meta tags and searchable parameters) also SEO for AI LLMs (+?)
 - update readme with required environment values
 - Create dynamic og file when user create or update post.
+- nextjs version update
 
 ## Installation
 
