@@ -124,7 +124,7 @@ export const postCategories = pgTable(
   {
     postId: uuid("post_id")
       .notNull()
-      .references(() => posts.id),
+      .references(() => posts.id, { onDelete: "cascade" }), // Add the onDelete: "cascade" option
     categoryId: uuid("category_id")
       .notNull()
       .references(() => categories.id),

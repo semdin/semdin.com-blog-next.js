@@ -16,21 +16,23 @@ type FooterProps = {
 export const Footer = ({ categories }: FooterProps) => {
   return (
     <footer>
-      <div className="flex flex-col items-center justify-center py-8 text-center md:py-12 lg:py-16">
-        <div className="flex items-center space-x-2">
+      <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center space-y-4">
           <Image
             src="/images/icon.png"
             width="40"
             height="40"
             alt="Logo"
-            className="rounded-full overflow-hidden object-cover"
+            className="rounded-full object-cover"
             style={{ aspectRatio: "40/40", objectFit: "cover" }}
           />
           <p className="font-semibold text-lg tracking-tighter sm:text-base md:text-lg">
-            Semdin.com
+            semdin.com
           </p>
         </div>
-        <nav className="flex items-center justify-center gap-4 mt-4 text-sm md:mt-6 md:gap-6">
+        {/* Navigation Section */}
+        <nav className="flex flex-wrap items-center justify-center gap-4 mt-4 text-sm md:mt-6 md:gap-6">
           <Link
             href="/"
             className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"

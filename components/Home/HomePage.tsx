@@ -153,8 +153,8 @@ export default function HomePage({ featuredPosts, allPosts }: HomePageProps) {
               );
             })}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="hidden lg:block" />
+          <CarouselNext className="hidden lg:block" />
         </Carousel>
       </section>
 

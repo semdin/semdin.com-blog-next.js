@@ -23,9 +23,9 @@ export default function PostContent({ content }: { content: string }) {
   const processedContent = preprocessMarkdown(content);
 
   return (
-    <div className="flex gap-4">
-      <div className="flex-1">
-        {isMounted ? (
+    <div className="flex flex-col lg:flex-row w-full">
+      {isMounted ? (
+        <div className="w-full lg:w-3/4">
           <MdPreview
             id={id}
             modelValue={processedContent}
@@ -35,14 +35,14 @@ export default function PostContent({ content }: { content: string }) {
               currentTheme === "dark" ? "md-editor-dark" : ""
             } md-editor-previewOnly`}
           />
-        ) : (
-          <div className="flex justify-center items-center h-40 w-full">
-            <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        )}
-      </div>
-      <div className="w-64 hidden lg:block">
-        <div className="sticky top-20 max-h-screen overflow-y-auto">
+        </div>
+      ) : (
+        <div className="flex justify-center items-center h-40 w-full">
+          <Loader2 className="mr-2 h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      )}
+      <div className="hidden lg:block lg:w-1/4">
+        <div className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
           {scrollElement && (
             <MdCatalog
               editorId={id}
