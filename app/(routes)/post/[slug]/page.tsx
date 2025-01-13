@@ -1,5 +1,5 @@
 import { getPostBySlug } from "@/actions/actions";
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import { CopyLink } from "@/components/Navigation/CopyLink";
 import PostContent from "@/components/Post/PostContent";
 import { getUserRole } from "@/lib/auth/getUserRoleServerAction";
