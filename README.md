@@ -20,6 +20,7 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - update readme with required environment values
 - Create dynamic og file when user create or update post.
 - nextjs version update
+- Optimize unused js
 
 ## Installation
 
