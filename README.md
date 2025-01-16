@@ -22,6 +22,7 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - nextjs version update
 - Optimize unused js
 - Daily thougts side or updates page (MAYBE A FEATURE)
+- Status shall be changed in update post and add post section.
 
 ## Installation
 
