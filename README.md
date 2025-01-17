@@ -24,6 +24,7 @@ semdin.com-blog-next.js is a simple blog platform for my personal sharings.
 - Daily thougts side or updates page (MAYBE A FEATURE)
 - Status shall be changed in update post and add post section.
 - word-break: break-word; for post view
+- login margin or padding top
 
 ## Installation
 
