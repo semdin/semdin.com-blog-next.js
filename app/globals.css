@@ -99,3 +99,7 @@ svg.md-editor-icon {
 .md-editor-toolbar-wrapper {
   border: 1px hsl(var(--input)) solid !important;
 }
+
+#preview_only-preview {
+  word-break: break-word !important; /* Ensures long words wrap properly */
+}
