@@ -30,6 +30,7 @@
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.3",
     "embla-carousel-react": "^8.5.2",
+    "gsap": "^3.12.7",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.469.0",
     "md-editor-rt": "^5.2.1",

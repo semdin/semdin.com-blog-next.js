@@ -30,6 +30,7 @@ export const Footer = ({ categories }: FooterProps) => {
           <p className="font-semibold text-lg tracking-tighter sm:text-base md:text-lg">
             semdin.com
           </p>
+          <p className="text-sm">© 2025 All rights reserved.</p>
         </div>
         {/* Navigation Section */}
         <nav className="flex flex-wrap items-center justify-center gap-4 mt-4 text-sm md:mt-6 md:gap-6">
